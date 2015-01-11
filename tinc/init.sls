@@ -1,28 +1,22 @@
+
 tinc:
   pkg:
     - installed
     - name: tinc
-  service:
-    - running
-    - name: tinc
-    - enable: True
 
 {% if grains['os_family'] == 'RedHat' %}
-/etc/init.d/tinc:
-  file.managed:
-    - source: salt://tinc/files/init.redhat
-    - mode: 755
-    - user: root
-    - group: root
+  {% if grains['os'] == 'CentOS' and grains['osmajorrelease'] == '7' %}
+include:
+  - tinc.init-centos-7
+  {% else %}
+include:
+  - tinc.init-redhat
+  {% endif %}
+{% else %}
+include:
+  - tinc.init-default
 {% endif %}
 
-/etc/tinc/nets.boot:
-  file.managed:
-    - mode: 755
-    - user: root
-    - group: root
-    - replace: false
-    - source: salt://tinc/files/nets.boot
 
 {% for netname, network in pillar.get('tinc', {}).items() %}
 
